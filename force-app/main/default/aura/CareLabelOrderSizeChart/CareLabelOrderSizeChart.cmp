@@ -1,0 +1,95 @@
+<aura:component  Controller="CareLabelOrder" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global"> 
+    <aura:attribute name="viewisModalOpen" type="Boolean" />
+    <aura:attribute name="sizelist" type="List" />
+    <aura:attribute name="selectedsizechart" type="List" />
+    
+    <aura:attribute name="selectedSize" type="String" />
+    <aura:attribute name="sizeChartData" type="Object"/>
+    <aura:attribute name="viewSizeChartData" type="Object"/>
+    
+    <aura:registerEvent name="changeTabColorSizeChart" type="c:changeTabColor"/> 
+    
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}"/>
+    <aura:method name="getSelectedData" action="{!c.selectedSize}" 
+                 access="public">
+    </aura:method>
+    <aura:method name="viewSelectedData" action="{!c.viewselectedSize}" 
+                 access="public">
+    </aura:method>
+    <aura:method name="clearSelectedData" action="{!c.clearData}" 
+                 access="public">
+        <aura:attribute name="CloneORClear" type="String"/> 
+    </aura:method>
+     <aura:If isTrue="{!v.sizelist.length>0}">
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-no-row-hover" style="border:1px solid #d4d4d4; ">
+        <thead>
+            <tr class="slds-line-height_reset">
+                <th>           
+                </th>
+                <!--th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size Chart Name</div></th--> 
+                <th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size0 </div></th> 
+                <th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size1 </div></th>
+                <th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size2 </div></th> 
+                <th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size3 </div></th> 
+                <th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size4 </div></th> 
+                <th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size5 </div></th> 
+                <th scope="col" style=""><div class="slds-truncate" style="color:#16325c;font-weight:bold;">Size6 </div></th> 
+                
+            </tr>
+        </thead>
+        <tbody> 
+            <aura:iteration items="{!v.sizelist}" var="slist" >
+                <!--<c:ItemMastersizechart sizechart="{!slist}"/>-->
+                <tr class="slds-line-height_reset">
+                    <td>          
+                        <ui:inputRadio aura:id="checknames" value="{!slist.selectedsizechart}" text="{!slist.Name}" change="{!c.handleSelected}"/>
+                        <span class="slds-checkbox--faux" />
+                        <span class="slds-form-element__label"></span>
+                        
+                    </td>
+                    <td scope="row">
+                        <div class="slds-truncate" title="{!slist.Size__c}">{!slist.Size__c}</div>
+                    </td>
+                    
+                    <td scope="row">
+                        <div class="slds-truncate" title="{!slist.Size1__c}">{!slist.EngSize1__c}</div>
+                    </td>
+                    <td scope="row">
+                        <div class="slds-truncate" title="{!slist.Size2__c}">{!slist.EngSize2__c}</div>
+                    </td>
+                    
+                    <td scope="row">
+                        <div class="slds-truncate" title="{!slist.Size3__c}">{!slist.EngSize3__c}</div>
+                    </td>
+                    <td scope="row">
+                        <div class="slds-truncate" title="{!slist.Siz4__c}">{!slist.EngSize4__c}</div>
+                    </td>
+                    
+                    <td scope="row">
+                        <div class="slds-truncate" title="{!slist.Size5__c}">{!slist.EngSize5__c}</div>                        
+                    </td>
+                    <td scope="row">
+                        <div class="slds-truncate" title="{!slist.Size6__c}">{!slist.EngSize6__c}</div>
+                    </td>
+                </tr>                     
+            </aura:iteration>
+        </tbody>
+         </table>
+         <aura:set attribute="else"> 
+             <h1 style="margin-left: 31%;padding: 2rem;font-size: 21PX;">Configuration Not Done For This Product!!!...</h1>
+         </aura:set>
+    </aura:If>
+    <!--Modal/Popup Box Footer Starts here-->
+    <!--footer class="slds-modal__footer">
+                        <lightning:button variant="neutral"
+                                          label="Cancel"
+                                          title="Cancel"
+                                          onclick="{!c.closeModel}"/>
+                        <lightning:button variant="brand"
+                                          label="Select"
+                                          title="Select"
+                                          onclick="{!c.selectedSize}"/>
+                    </footer-->
+    
+    
+</aura:component>
