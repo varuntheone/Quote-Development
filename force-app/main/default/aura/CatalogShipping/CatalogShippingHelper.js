@@ -8,11 +8,18 @@
         });
         actiongetcart.setCallback(this, function (response) {
             var state = response.getState();
-            if (state === "SUCCESS") {
+            //alert("State:" + state);
+            if (state === "SUCCESS") {                
                 if (response.getReturnValue() != null) {
                     component.set('v.CartValue', response.getReturnValue().length);
                     component.set('v.DisplayCartDetail', response.getReturnValue());
-                    //alert('cartdetails>>'+component.get("v.DisplayCartDetail"));
+                    var result = response.getReturnValue();
+                    /*for (var i = 0; i < result.length; i++){
+                        //alert("inside loop");
+                        var rows = result[i];
+                        //if (rows.Product__c) rows.Product__r.Product_Type__c = rows.Product__r.Product_Type__c;                        
+                        //alert("ProdType:" + result[i].Product__r.Product_Type__c);
+                    }*/                    
                 } else {
                     if (component.get('v.CartValue') == 0) {
                         component.set("v.HideButtons", false);
@@ -30,6 +37,21 @@
             $A.util.toggleClass(spinner, "slds-hide");
         });
         $A.enqueueAction(actiongetcart);
+    },
+
+    getBundleProductList: function (component, event, helper) {
+        var action = component.get("c.getBundleProducts");
+        action.setCallback(this, function (response) {
+            var state = response.getState();
+            if (state === "SUCCESS") {
+                if (response.getReturnValue() != null) {
+                    component.set('v.bundleProductList', response.getReturnValue());                    
+                }
+            }
+            /*var spinner = component.find('spinner');
+            $A.util.toggleClass(spinner, "slds-hide");*/
+        });
+        $A.enqueueAction(action);
     },
     ClearCartNew:function(component, event,helper){
         var action1 = component.get("c.ClearCartDetails");

@@ -3,11 +3,64 @@ public without sharing class SOControllerNew {
     public static List<Sales_Order_Line_Items__c>  getAllCartDetails(id customerid){
         system.debug('customerid>>'+customerid);
         List<Sales_Order_Line_Items__c> SOList = [SELECT Product_Name__c,Product_Code__c,Product_Description__c,
-                                                 Quantity__c,Sales_Order__c, Product_image_url__c FROM
-                                                 Sales_Order_Line_Items__c WHERE
+                                                 Quantity__c,Sales_Order__c, Product_image_url__c,Product__r.Product_Type__c
+                                                 FROM Sales_Order_Line_Items__c WHERE
                                                  Sales_Order__r.UserId__c =:customerid];
         system.debug('SOList>>'+SOList);
         return SOList;
+    }
+
+    //This method returns the list of bundle products.
+    @AuraEnabled
+    public static List<Product_Bundle__c>  getBundleProducts(){
+        List<Product_Bundle__c> prodBundleList = [SELECT Parent_Product__c,Child_Product__c,Quantity__c,
+                                            Child_Product__r.Name,Child_Product__r.ProductCode,
+                                            Child_Product__r.Description,Child_Product__r.Product_image_url__c
+                                            FROM Product_Bundle__c WHERE Parent_Product__c <> null AND
+                                            Child_Product__c <> null];
+        system.debug('prodBundleList>>'+prodBundleList);
+        return prodBundleList;
+    }
+
+    @AuraEnabled
+    public static List<shipWrapper> FetchCartDetails(String customerid){
+        //Id currentuserId = UserInfo.getUserId();
+        system.debug('customerid>>'+customerid);
+        List<shipWrapper> shipWrapList = new List<shipWrapper>();
+        
+        
+        List<Sales_Order_Line_Items__c> soliList = [SELECT Product_Name__c,Product_Code__c,Product_Description__c,
+                                                  Quantity__c,Sales_Order__c, Product_image_url__c,Product_Type__c,Product__c
+                                                  FROM Sales_Order_Line_Items__c WHERE
+                                                  Sales_Order__r.UserId__c =:customerid];        
+        List<Product_Bundle__c> prodBundleList = [SELECT Parent_Product__c,Child_Product__c,Quantity__c,
+                                                  Child_Product__r.Name,Child_Product__r.ProductCode,
+                                                  Child_Product__r.Description,Child_Product__r.Product_image_url__c
+                                                  FROM Product_Bundle__c WHERE Parent_Product__c <> null AND
+                                                  Child_Product__c <> null];
+        system.debug('soliList:'+soliList);
+        system.debug('prodBundleList:'+prodBundleList);
+        
+        for(Sales_Order_Line_Items__c soli : soliList){
+            List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
+            shipWrapper shipWrap = new shipWrapper();            
+            shipWrap.soli = soli;            
+            
+            if(soli.Product_Type__c == 'Bundle'){
+                for(Product_Bundle__c prdBund : prodBundleList){
+                    if(soli.Product__c == prdBund.Parent_Product__c){
+                        Product_Bundle__c prodBundle = prdBund.clone(true, true, false, false);
+                        prodBundle.Quantity__c = prdBund.Quantity__c * soli.Quantity__c;
+                        prodBundSubList.add(prodBundle);
+                    }
+                }
+                shipWrap.bundleProducts = prodBundSubList;
+            }
+            shipWrapList.add(shipWrap);
+        }
+        
+        system.debug('shipWrapList:'+shipWrapList);
+        return shipWrapList;
     }
 
     @AuraEnabled
@@ -270,6 +323,15 @@ public without sharing class SOControllerNew {
         resetSO.Ship_to_Postcode__c = '';
         resetSO.Ship_to_Factory__c = '';
         upsert resetSO;
+    }
+
+
+    //wrapper for cartDetails on shipmentPage 
+    public class shipWrapper{
+        @AuraEnabled
+        public Sales_Order_Line_Items__c soli;
+        @AuraEnabled
+        public List<Product_Bundle__c> bundleProducts;        
     }
 
     //wrapper for address
