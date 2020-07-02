@@ -57,15 +57,7 @@
             <lightning:button iconName="utility:chevronright" iconPosition="right"
             disabled="{! v.currentPageNumber == v.totalPages}" onclick="{!c.onNext}" />
         </lightning:layout>-->
-        <div class="slideshow-container">
-            <tr>
-                <aura:iteration items="{!v.completeWrap}" var="prod" indexVar='ind'>                    
-                    <td><p class="slds-truncate" title="{!prod.Name}"><b>Prod. Name: </b>{!prod.Name}</p></td>                                      
-                </aura:iteration>
-            </tr>
-            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-            <a class="next" onclick="plusSlides(1)">&#10095;</a>
-        </div>
+        
         
         <!--<aura:If isTrue="{!v.selectedTab!='Labels &amp; Tickets'}">-->
             <div class="slds-grid_vertical-align-end">                        

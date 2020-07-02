@@ -4,8 +4,9 @@
         var spinner = component.find('spinner');
         $A.util.toggleClass(spinner, "slds-hide");
         //helper.toGetcustomerData(component, event, helper);
-        helper.toGetcustomerDataNew(component, event,helper);
-        helper.getBundleProductList(component, event,helper);
+        //helper.toGetcustomerDataNew(component, event,helper);
+        //helper.getBundleProductList(component, event,helper);
+        helper.fetchCartDetails(component, event,helper);
     },
     ClearItems: function(component, event, helper) { 
         // alert('button should hide');
