@@ -109,11 +109,14 @@
     },
 
     toDeleteProductCart:function(component, event,helper,index) {
-        var CartDisplay =component.get('v.DisplayCartDetail');
+        var CartDisplay = component.get('v.DisplayCartDetail');
+        /*alert("soId:" + CartDisplay[index].soli.Sales_Order__c + "\n" +
+            "soliId:" + CartDisplay[index].soli.Id);*/
+
         var action = component.get("c.deleteProductFromCart");
         action.setParams({ 
-            "soId": CartDisplay[index].Sales_Order__c,
-            "soliId": CartDisplay[index].Id
+            "soId": CartDisplay[index].soli.Sales_Order__c,
+            "soliId": CartDisplay[index].soli.Id
         });
         action.setCallback(this, function(response){
             var state = response.getState();
@@ -148,11 +151,11 @@
         for(var i=0;i<temp.length;i++) {
             //code to add the upper limit of box quantity by chandana  
             //var result = Math.ceil(temp[i].Quantity/temp[i].boxquantity)*temp[i].boxquantity;
-            var newqty= temp[i].Quantity__c;
+            var newqty= temp[i].soli.Quantity__c;
             //alert('newqty'+newqty);
             if(!newqty || newqty<=0)
             {
-                qtyval = temp[i].Quantity__c;
+                qtyval = temp[i].soli.Quantity__c;
             }
         }
         component.set('v.DisplayCartDetail', temp);
@@ -172,6 +175,7 @@
                 {
                     var updateStatus = response.getReturnValue();
                     if (updateStatus) {
+                        component.rerenderCart();
                         var message = 'Cart Updated Successfully';
                         helper.successToast(component, event, helper, message);
                     } else {

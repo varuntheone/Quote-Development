@@ -43,8 +43,8 @@ public without sharing class SOControllerNew {
         
         for(Sales_Order_Line_Items__c soli : soliList){
             List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
-            shipWrapper shipWrap = new shipWrapper();            
-            shipWrap.soli = soli;            
+            shipWrapper shipWrap = new shipWrapper();
+            shipWrap.soli = soli;
             
             if(soli.Product_Type__c == 'Bundle'){
                 for(Product_Bundle__c prdBund : prodBundleList){
@@ -100,8 +100,17 @@ public without sharing class SOControllerNew {
     public static Boolean updateCartValue(String solilistjson) {
         Boolean updateStatus = true;
         try{
-            system.debug('solilistjson:::'+solilistjson);            
-            list<Sales_Order_Line_Items__c> SolilistUpdated = (List<Sales_Order_Line_Items__c>)JSON.deserialize(solilistjson, List<Sales_Order_Line_Items__c>.class);            
+            system.debug('solilistjson:::'+solilistjson);
+            //JSON.deserialize will convert json string to an object.
+            //list<Sales_Order_Line_Items__c> SolilistUpdated = (List<Sales_Order_Line_Items__c>)JSON.deserialize(solilistjson, List<Sales_Order_Line_Items__c>.class);
+            list<shipWrapper> SolilistUpdatedWrap = (List<shipWrapper>)JSON.deserialize(solilistjson, List<shipWrapper>.class);
+            system.debug('SolilistUpdatedWrap:::'+SolilistUpdatedWrap);
+
+            list<Sales_Order_Line_Items__c> SolilistUpdated = new list<Sales_Order_Line_Items__c>();
+            for(shipWrapper soliWrap : SolilistUpdatedWrap){
+                if(soliWrap.soli <> null)
+                SolilistUpdated.add(soliWrap.soli);
+            }
             system.debug('SolilistUpdated:::'+SolilistUpdated);
             upsert SolilistUpdated;
         }

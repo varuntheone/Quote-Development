@@ -19,6 +19,8 @@ public Class SOConfirmationPDFCtrl
     public String CI{get;set;}
     public boolean isprice{get;set;}
     public Decimal total{get;set;}
+
+    public List<shipWrapper> shipWrapList{get;set;}
     
     public SOConfirmationPDFCtrl(ApexPages.StandardController controller) {
         System.debug('inside SOPDF::');
@@ -50,8 +52,8 @@ public Class SOConfirmationPDFCtrl
         //SORec.Id = 'a0X2D000000jkUmUAI';
         SORec = [Select Id, Name, CreatedDate, Company__c, Currency__c, Delivery_Instruction__c, Expected_Delivery_Date__c,
                  Status__c, Bill_to_Address__c, Ship_to_Address__c, Transportation_Details__c, Shipping_Mark__c,
-                 (Select Id, Name, Product_Code__c, Product_Description__c, Quantity__c,Product_image_url__c
-                 from Sales_Order_Line_Items__r) from Sales_Order__c where id =: SORec.Id];
+                 (Select Id, Name, Product_Code__c, Product_Description__c, Quantity__c,Product_image_url__c,
+                 Product_Type__c,Product__c from Sales_Order_Line_Items__r) from Sales_Order__c where id =: SORec.Id];
         System.debug('SORec 2::'+SORec);
         System.debug('SORec Sales_Order_Line_Items__r::'+SORec.Sales_Order_Line_Items__r);
         
@@ -103,31 +105,7 @@ public Class SOConfirmationPDFCtrl
         
         SORec.Transportation_Details__c = SORec.Transportation_Details__c!=null?SORec.Transportation_Details__c:'';
         SORec.Shipping_Mark__c = SORec.Shipping_Mark__c!=null?SORec.Shipping_Mark__c:'';
-        /*isprice = SORec.Retailer_Code1__r.Show_Price_in_SO_Confirmation_PDF__c;
-        system.debug('SORec.Vertical__c: '+SORec.Vertical__c);
-        if(SORec.Vertical__c =='EAS & RFID' || SORec.Vertical__c =='Labels & Tickets')
-        {
-            isLabelOrRFID = true;
-        }
-        else
-            isLabelOrRFID = false;
-        System.debug('isLabelOrRFID::'+isLabelOrRFID);
         
-        if(con.Customer_Information__c==null)
-            con.Customer_Information__c=SORec.Supplier__c;
-        
-        List<Retailer_Related_Data__c> retailerRelatedData = [select id,name,Manufacturer_Factory_Code__c,Supplier_Code__c,Retailer_Code__r.Show_Special_Terms_and_Conditions_PDF__c,Retailer_Code__r.Special_Terms_and_Conditions__c from Retailer_Related_Data__c where Retailer_Code__c =: SORec.Retailer_Code1__c AND Customer_Information__c =:con.Customer_Information__c ];
-        if(retailerRelatedData.size()>0)
-        {
-            ManufacturerCode = retailerRelatedData[0].Manufacturer_Factory_Code__c;
-            SupplierCode = retailerRelatedData[0].Supplier_Code__c;
-        }
-        retailerCode =retailerRelatedData[0].Retailer_Code__r.Show_Special_Terms_and_Conditions_PDF__c;
-        //retailerCode =false;
-        
-        if(retailerCode == true)
-            termConditions =retailerRelatedData[0].Retailer_Code__r.Special_Terms_and_Conditions__c;
-        retailerName = SORec.Retailer_Code1__r.name;*/
         SOLIRecs = new List<Sales_Order_Line_Items__c>();
         
         String currentRequestURL = URL.getCurrentRequestUrl().toExternalForm();
@@ -135,22 +113,34 @@ public Class SOConfirmationPDFCtrl
         currentRequestURL += '/apex/SOLICustomerPDF?Id=';
         System.debug('Current request URL: ' + currentRequestURL);
         
-        for(Sales_Order_Line_Items__c soli:SORec.Sales_Order_Line_Items__r) {
+        //Get bundleProducts.
+        List<Product_Bundle__c> prodBundleList = [SELECT Parent_Product__c,Child_Product__c,Quantity__c,
+                                                  Child_Product__r.Name,Child_Product__r.ProductCode,
+                                                  Child_Product__r.Description,Child_Product__r.Product_image_url__c
+                                                  FROM Product_Bundle__c WHERE Parent_Product__c <> null AND
+                                                  Child_Product__c <> null];
+        system.debug('prodBundleList:'+prodBundleList);
+        List<shipWrapper> shipWrapList = new List<shipWrapper>();
+
+        for(Sales_Order_Line_Items__c soli:SORec.Sales_Order_Line_Items__r) {            
+            List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
+            shipWrapper shipWrap = new shipWrapper();
+            shipWrap.soli = soli;
             
-            /*soli.Product_name__c = soli.Price_Specification_Book_Product__r.Name;
-            soli.Product_Description__c = soli.Price_Specification_Book_Product__r.Description__c;
-            soli.Charge_Type__c = soli.Products__r.Product_Type__c;
-            soli.Family__c = soli.Products__r.Product_Family__c;
-            soli.Pieces__c = soli.Price_Specification_Book_Product__r.Order_UOM__c;
-            soli.Price_100_pcs__c = soli.Price_100_pcs__c!=null?soli.Price_100_pcs__c:'0';
-            
-            soli.DEPT_DESC__c = currentRequestURL+soli.Id;
-            System.debug('soli.DEPT_DESC__c: ' + soli.DEPT_DESC__c);
-            System.debug('Inside iteration :  :: '+soli.Price_100_pcs_c__c);
-            total += (decimal.valueOf(soli.Supply_Quantity__c)  * decimal.valueOf(soli.Price_100_pcs__c))/100;*/
-            
+            if(soli.Product_Type__c == 'Bundle'){
+                for(Product_Bundle__c prdBund : prodBundleList){
+                    if(soli.Product__c == prdBund.Parent_Product__c){
+                        Product_Bundle__c prodBundle = prdBund.clone(true, true, false, false);
+                        prodBundle.Quantity__c = prdBund.Quantity__c * soli.Quantity__c;
+                        prodBundSubList.add(prodBundle);
+                    }
+                }
+                shipWrap.bundleProducts = prodBundSubList;
+            }
+            shipWrapList.add(shipWrap);            
             SOLIRecs.add(soli);
         }
+        system.debug('shipWrapList:'+shipWrapList);
         total=total.setScale(2);
         System.debug('total :: '+total);
         System.debug('SOLIRecs :: '+SOLIRecs);
@@ -172,6 +162,13 @@ public Class SOConfirmationPDFCtrl
             invToAdd = [select name,Factory_Name__c,Address_1__c,Address_2__c,City__c,State__c,Country__c,Postcode__c,Contact__c,Tel_No__c,Fax_No__c,Email_Address__c from Ship_Bill_Address__c where id =: SORec.Invoice_To_Address__c];
         }*/
         
+    }
+
+    public class shipWrapper{
+        @AuraEnabled
+        public Sales_Order_Line_Items__c soli {get; set;}
+        @AuraEnabled
+        public List<Product_Bundle__c> bundleProducts {get; set;}
     }
     
 }

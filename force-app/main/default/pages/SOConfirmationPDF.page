@@ -116,14 +116,52 @@
         </tr>    
     </table>
     <br/>
+
     <table border="1">
         <tr>
             <th>Model</th>
             <th>Visual</th>
             <th>Color</th>
             <th>Product Description </th>
-            <!--<th>Product Category</th>
-<th>Product Family</th>-->            
+                      
+            <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Barcode</th>
+            <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Size</th>  
+            <th>Quantity</th>
+            <th style="display:{!IF( isprice, '' , 'None')}">Price/100pcs <br/>(Ex-Work, without VAT)</th> 
+            <th style="display:{!IF( isprice, '' , 'None')}">Amount <br/>({!SORec.Currency__c})</th> 
+        </tr>
+
+        <apex:repeat value="{!shipWrapList}" var="shipWrap">
+            <tr>
+                <td>                    
+                    <apex:outputPanel rendered="{!isSoliLink != '1'}">
+                        <apex:outputText value="{!shipWrap.soli.Product_Code__c}"/>
+                    </apex:outputPanel>                    
+                </td>
+                <td>
+                    <img src="{!shipWrap.soli.Product_image_url__c}" alt="Product" width="80"/>
+                </td>
+                <td>
+                    <apex:outputText value="{!shipWrap.soli.Product_Code__c}"/>
+                </td>
+                <td>
+                    <apex:outputText value="{!shipWrap.soli.Product_Description__c}"/>
+                </td>
+                <td>
+                    <apex:outputText value="{!shipWrap.soli.Quantity__c}"/>
+                </td>
+            </tr>
+        </apex:repeat>
+    </table>
+
+
+
+    <table border="1">
+        <tr>
+            <th>Model</th>
+            <th>Visual</th>
+            <th>Color</th>
+            <th>Product Description </th>                       
             <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Barcode</th>
             <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Size</th>  
             <th>Quantity</th>
@@ -132,17 +170,10 @@
         </tr>
         <apex:repeat value="{!SOLIRecs}" var="soli">
             <tr>
-                <td>
-                    <!--<apex:outputPanel rendered="{!isSoliLink = '1'}">
-                        <a target="_blank" href="{!soli.DEPT_DESC__c}" >
-                            <apex:outputText value="{!soli.Product_Code__c}"/>
-                        </a>
-                    </apex:outputPanel>-->
-                    
+                <td>                    
                     <apex:outputPanel rendered="{!isSoliLink != '1'}">
                         <apex:outputText value="{!soli.Product_Code__c}"/>
-                    </apex:outputPanel>
-                    
+                    </apex:outputPanel>                    
                 </td>
                 <td>
                     <img src="{!soli.Product_image_url__c}" alt="Product" width="80"/>
@@ -155,38 +186,9 @@
                 </td>
                 <td>
                     <apex:outputText value="{!soli.Quantity__c}"/>
-                </td>
-                
-                <!--<td style="display:{!IF( isLabelOrRFID, '' , 'None')}">
-                    <apex:outputText value="{!soli.APN__c}"/>
-                </td>
-                <td style="display:{!IF( isLabelOrRFID, '' , 'None')}">
-                    <apex:outputText value="{!soli.Size__c}"/>
-                </td> 
-                <td style="text-align:right">
-                    <apex:outputText value="{0, number, #,###.##}"> <apex:param value="{!VALUE(soli.Supply_Quantity__c)}" /> 
-                    </apex:outputText> (<apex:outputText value="{!soli.Pieces__c}"/>)
-                    
-                </td>
-                <td style="display:{!IF( isprice, '' , 'None')};text-align:right">
-                    <apex:outputText value="{0, number, ###,##0.00}">
-                        <apex:param value="{!ROUND(VALUE(soli.Price_100_pcs__c),2)}"/>
-                    </apex:outputText>
-                    
-                </td>
-                <td style="display:{!IF( isprice, '' , 'None')};text-align:right">
-                    
-                    <apex:outputText value="{0, number, ###,##0.00}">
-                        <apex:param value="{!ROUND(((VALUE(soli.Supply_Quantity__c))/100) * VALUE(soli.Price_100_pcs__c),2)}"/>
-                    </apex:outputText>
-                    
-                </td>-->
-                
-            </tr>
-            
-            
-        </apex:repeat>
-        
+                </td>                
+            </tr>            
+        </apex:repeat>        
     </table>
     <table border="1" style="display:{!IF( isprice, '' , 'None')}">
         <tr><td style="text-align:right;font-weight:bold"><span style="margin-right:15px;">Total :</span> <strong >
