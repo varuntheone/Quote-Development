@@ -117,46 +117,74 @@
     </table>
     <br/>
 
+    <!--<apex:repeat value="{!shipWrapList}" var="shipWrap">-->
     <table border="1">
         <tr>
             <th>Model</th>
             <th>Visual</th>
             <th>Color</th>
             <th>Product Description </th>
-                      
+
             <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Barcode</th>
-            <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Size</th>  
+            <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Size</th>
             <th>Quantity</th>
-            <th style="display:{!IF( isprice, '' , 'None')}">Price/100pcs <br/>(Ex-Work, without VAT)</th> 
-            <th style="display:{!IF( isprice, '' , 'None')}">Amount <br/>({!SORec.Currency__c})</th> 
+            <th style="display:{!IF( isprice, '' , 'None')}">Price/100pcs <br />(Ex-Work, without VAT)</th>
+            <th style="display:{!IF( isprice, '' , 'None')}">Amount <br />({!SORec.Currency__c})</th>
         </tr>
 
         <apex:repeat value="{!shipWrapList}" var="shipWrap">
             <tr>
-                <td>                    
+                <td>
                     <apex:outputPanel rendered="{!isSoliLink != '1'}">
-                        <apex:outputText value="{!shipWrap.soli.Product_Code__c}"/>
-                    </apex:outputPanel>                    
+                        <apex:outputText value="{!shipWrap.soli.Product_Code__c}" />
+                    </apex:outputPanel>
                 </td>
                 <td>
-                    <img src="{!shipWrap.soli.Product_image_url__c}" alt="Product" width="80"/>
+                    <img src="{!shipWrap.soli.Product_image_url__c}" alt="Product" width="80" />
                 </td>
                 <td>
-                    <apex:outputText value="{!shipWrap.soli.Product_Code__c}"/>
+                    <apex:outputText value="{!shipWrap.soli.Product_Code__c}" />
                 </td>
                 <td>
-                    <apex:outputText value="{!shipWrap.soli.Product_Description__c}"/>
+                    <apex:outputText value="{!shipWrap.soli.Product_Description__c}" />
                 </td>
                 <td>
-                    <apex:outputText value="{!shipWrap.soli.Quantity__c}"/>
+                    <apex:outputText value="{!shipWrap.soli.Quantity__c}" />
                 </td>
             </tr>
+
+            <tr style="{!IF((shipWrap.soli.Product_Type__c == 'Bundle'),'','display:none')}">
+                <!--<table border="1">
+                    <tbody>-->
+                <th>Bundle Products</th>
+                <th>Info</th>
+                <apex:repeat value="{!shipWrap.bundleProducts}" var="bundle">
+                    
+                    <tr>                   
+                    <td>
+                        <img src="{!bundle.Child_Product__r.Product_image_url__c}" alt="Product" width="80" />
+                    </td>
+                    <td>
+                        <p><b style="width:80px;display:inline-block;">Code
+                            </b><span style="color:#a41f34;">:
+                                {!bundle.Child_Product__r.ProductCode}</span></p>
+                        <p class="slds-truncate"><b style="width:80px;display:inline-block;">Description
+                            </b>: {!bundle.Child_Product__r.Description}</p>
+                        <p class="slds-truncate"><b style="width:80px;display:inline-block;">Quantity
+                            </b>: {!bundle.Quantity__c}</p>
+                    </td>  
+                </tr>                          
+                </apex:repeat>
+            <!--</tbody>
+            </table>-->
+        </tr>
         </apex:repeat>
     </table>
+    <!--</apex:repeat>-->
 
 
 
-    <table border="1">
+    <!--<table border="1">
         <tr>
             <th>Model</th>
             <th>Visual</th>
@@ -189,7 +217,7 @@
                 </td>                
             </tr>            
         </apex:repeat>        
-    </table>
+    </table>-->
     <table border="1" style="display:{!IF( isprice, '' , 'None')}">
         <tr><td style="text-align:right;font-weight:bold"><span style="margin-right:15px;">Total :</span> <strong >
             <apex:outputText value="{!LEFT(SORec.Currency__c,3)}"/>

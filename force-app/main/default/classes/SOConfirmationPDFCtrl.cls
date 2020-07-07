@@ -52,7 +52,7 @@ public Class SOConfirmationPDFCtrl
         //SORec.Id = 'a0X2D000000jkUmUAI';
         SORec = [Select Id, Name, CreatedDate, Company__c, Currency__c, Delivery_Instruction__c, Expected_Delivery_Date__c,
                  Status__c, Bill_to_Address__c, Ship_to_Address__c, Transportation_Details__c, Shipping_Mark__c,
-                 (Select Id, Name, Product_Code__c, Product_Description__c, Quantity__c,Product_image_url__c,
+                 (Select Id, Name,Product_Name__c, Product_Code__c, Product_Description__c, Quantity__c,Product_image_url__c,
                  Product_Type__c,Product__c from Sales_Order_Line_Items__r) from Sales_Order__c where id =: SORec.Id];
         System.debug('SORec 2::'+SORec);
         System.debug('SORec Sales_Order_Line_Items__r::'+SORec.Sales_Order_Line_Items__r);
@@ -113,14 +113,22 @@ public Class SOConfirmationPDFCtrl
         currentRequestURL += '/apex/SOLICustomerPDF?Id=';
         System.debug('Current request URL: ' + currentRequestURL);
         
+        
         //Get bundleProducts.
+        Set<Id> parentProducts = new Set<Id>();
+        if (SORec.Sales_Order_Line_Items__r <> null && SORec.Sales_Order_Line_Items__r.size() > 0) {
+            for (Sales_Order_Line_Items__c soLineItm : SORec.Sales_Order_Line_Items__r) {
+                parentProducts.add(soLineItm.Product__c);
+            }
+        }
         List<Product_Bundle__c> prodBundleList = [SELECT Parent_Product__c,Child_Product__c,Quantity__c,
                                                   Child_Product__r.Name,Child_Product__r.ProductCode,
                                                   Child_Product__r.Description,Child_Product__r.Product_image_url__c
                                                   FROM Product_Bundle__c WHERE Parent_Product__c <> null AND
-                                                  Child_Product__c <> null];
+                                                  Child_Product__c <> null AND Parent_Product__c IN :parentProducts];
         system.debug('prodBundleList:'+prodBundleList);
-        List<shipWrapper> shipWrapList = new List<shipWrapper>();
+        system.debug('prodBundleListSize:'+prodBundleList.Size());
+        shipWrapList = new List<shipWrapper>();
 
         for(Sales_Order_Line_Items__c soli:SORec.Sales_Order_Line_Items__r) {            
             List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
@@ -139,8 +147,10 @@ public Class SOConfirmationPDFCtrl
             }
             shipWrapList.add(shipWrap);            
             SOLIRecs.add(soli);
+            
         }
         system.debug('shipWrapList:'+shipWrapList);
+
         total=total.setScale(2);
         System.debug('total :: '+total);
         System.debug('SOLIRecs :: '+SOLIRecs);
@@ -152,22 +162,10 @@ public Class SOConfirmationPDFCtrl
         billToAdd = [select name,Factory_Name__c,City__c,State__c,Country__c,Postcode__c 
                     from Ship_Bill_Address__c where id =: SORec.Bill_to_Address__c];
         
-        /*if(SORec.Company__c.contains('Suzhou'))
-        {
-            suzhouFlag = true;
-            buyerToAdd = new Ship_Bill_Address__c();
-            buyerToAdd = [select name,Factory_Name__c,Address_1__c,Address_2__c,City__c,State__c,Country__c,Postcode__c,Contact__c,Tel_No__c,Fax_No__c,Email_Address__c from Ship_Bill_Address__c where id =: SORec.Buyer_Address__c];
-            
-            invToAdd = new Ship_Bill_Address__c();
-            invToAdd = [select name,Factory_Name__c,Address_1__c,Address_2__c,City__c,State__c,Country__c,Postcode__c,Contact__c,Tel_No__c,Fax_No__c,Email_Address__c from Ship_Bill_Address__c where id =: SORec.Invoice_To_Address__c];
-        }*/
-        
     }
 
-    public class shipWrapper{
-        @AuraEnabled
-        public Sales_Order_Line_Items__c soli {get; set;}
-        @AuraEnabled
+    public class shipWrapper{        
+        public Sales_Order_Line_Items__c soli {get; set;}        
         public List<Product_Bundle__c> bundleProducts {get; set;}
     }
     

@@ -78,7 +78,7 @@ public with sharing class CatalogOrderControllerNew {
             try {
                 if(product.Product_Type__c == 'Bundle'){
                     List<Sales_Order__c> SOList=new List<Sales_Order__c>(); 
-                    SOList =[select id from Sales_Order__c where UserId__c =:userId];
+                    SOList =[select id from Sales_Order__c where UserId__c =:userId and Status__c ='New Order'];
                     system.debug('SOList>>'+SOList);
                     system.debug('SOList.size>>'+SOList.size());
 
@@ -129,7 +129,7 @@ public with sharing class CatalogOrderControllerNew {
                 } else{
                 
                 List<Sales_Order__c> SOList=new List<Sales_Order__c>(); 
-                SOList =[select id from Sales_Order__c where UserId__c =:userId];
+                SOList =[select id from Sales_Order__c where UserId__c =:userId and Status__c ='New Order'];
                 system.debug('SOList>>'+SOList);
                 system.debug('SOList.size>>'+SOList.size());
 
@@ -186,7 +186,12 @@ public with sharing class CatalogOrderControllerNew {
 
     @AuraEnabled
     public static Integer getCartDataCount(String customerid) {
-        Integer count= SOControllerNew.getAllCartDetails(customerid).size();
+
+        List<Sales_Order_Line_Items__c> SOList = [SELECT Id FROM Sales_Order_Line_Items__c WHERE
+                                                 Sales_Order__r.UserId__c =:customerid AND 
+                                                 Sales_Order__r.Status__c = 'New Order'];
+        system.debug('SOList>>'+SOList);
+        Integer count= SOList.size();
         system.debug('count>>>'+count);
         return count;
     }

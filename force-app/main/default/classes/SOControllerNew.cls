@@ -1,11 +1,12 @@
 public without sharing class SOControllerNew {
-    @AuraEnabled
+    /*@AuraEnabled
     public static List<Sales_Order_Line_Items__c>  getAllCartDetails(id customerid){
         system.debug('customerid>>'+customerid);
         List<Sales_Order_Line_Items__c> SOList = [SELECT Product_Name__c,Product_Code__c,Product_Description__c,
                                                  Quantity__c,Sales_Order__c, Product_image_url__c,Product__r.Product_Type__c
                                                  FROM Sales_Order_Line_Items__c WHERE
-                                                 Sales_Order__r.UserId__c =:customerid];
+                                                 Sales_Order__r.UserId__c =:customerid AND 
+                                                 Sales_Order__r.Status__c = 'New Order'];
         system.debug('SOList>>'+SOList);
         return SOList;
     }
@@ -20,7 +21,7 @@ public without sharing class SOControllerNew {
                                             Child_Product__c <> null];
         system.debug('prodBundleList>>'+prodBundleList);
         return prodBundleList;
-    }
+    }*/
 
     @AuraEnabled
     public static List<shipWrapper> FetchCartDetails(String customerid){
@@ -32,14 +33,24 @@ public without sharing class SOControllerNew {
         List<Sales_Order_Line_Items__c> soliList = [SELECT Product_Name__c,Product_Code__c,Product_Description__c,
                                                   Quantity__c,Sales_Order__c, Product_image_url__c,Product_Type__c,Product__c
                                                   FROM Sales_Order_Line_Items__c WHERE
-                                                  Sales_Order__r.UserId__c =:customerid];        
+                                                  Sales_Order__r.UserId__c =:customerid AND 
+                                                  Sales_Order__r.Status__c = 'New Order'];     
+        
+        Set<Id> parentProducts = new Set<Id>();
+        if (soliList <> null && soliList.size() > 0) {
+            for (Sales_Order_Line_Items__c soLineItm : soliList) {
+                parentProducts.add(soLineItm.Product__c);
+            }
+        }
+        
         List<Product_Bundle__c> prodBundleList = [SELECT Parent_Product__c,Child_Product__c,Quantity__c,
                                                   Child_Product__r.Name,Child_Product__r.ProductCode,
                                                   Child_Product__r.Description,Child_Product__r.Product_image_url__c
                                                   FROM Product_Bundle__c WHERE Parent_Product__c <> null AND
-                                                  Child_Product__c <> null];
+                                                  Child_Product__c <> null AND Parent_Product__c IN :parentProducts];
         system.debug('soliList:'+soliList);
         system.debug('prodBundleList:'+prodBundleList);
+        system.debug('prodBundleListSize:'+prodBundleList.Size());
         
         for(Sales_Order_Line_Items__c soli : soliList){
             List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
