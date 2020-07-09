@@ -24,10 +24,14 @@ public with sharing class CatalogOrderControllerNew {
     //Getting list of products on init.
     @AuraEnabled
     public static List<Product2> listProducts() {
-        /*Product List will be filtered based on PriceBookEntry list because different PriceBook may be 
+        /*Product List will be filtered based on PriceBook because different PriceBook may be 
         assigned for a perticular uer/group/role.*/
+        Set<Id> pricbookAssignedForUser =  SharedPricebooks.getPricebooks();
+        System.debug('pricbookAssignedForUser:'+pricbookAssignedForUser);
+
         List<PricebookEntry> priceBookEntryItems = [select Pricebook2Id,Product2Id,ProductCode 
-                                                    from PricebookEntry];
+                                                    from PricebookEntry where 
+                                                    Pricebook2Id in :pricbookAssignedForUser];
         System.debug('priceBookEntryItems:'+priceBookEntryItems);
 
         Set<Id> uniquePrdId = new Set<Id>();

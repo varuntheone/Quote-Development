@@ -1,4 +1,4 @@
-public without sharing class SOControllerNew {
+public with sharing class SOControllerNew {
     /*@AuraEnabled
     public static List<Sales_Order_Line_Items__c>  getAllCartDetails(id customerid){
         system.debug('customerid>>'+customerid);
@@ -31,8 +31,8 @@ public without sharing class SOControllerNew {
         
         
         List<Sales_Order_Line_Items__c> soliList = [SELECT Product_Name__c,Product_Code__c,Product_Description__c,
-                                                  Quantity__c,Sales_Order__c, Product_image_url__c,Product_Type__c,Product__c
-                                                  FROM Sales_Order_Line_Items__c WHERE
+                                                  Quantity__c,Sales_Order__c, Product_image_url__c,Product_Type__c,
+                                                  Product__c FROM Sales_Order_Line_Items__c WHERE
                                                   Sales_Order__r.UserId__c =:customerid AND 
                                                   Sales_Order__r.Status__c = 'New Order'];     
         
@@ -51,10 +51,34 @@ public without sharing class SOControllerNew {
         system.debug('soliList:'+soliList);
         system.debug('prodBundleList:'+prodBundleList);
         system.debug('prodBundleListSize:'+prodBundleList.Size());
+
+        //Get assigned PriceBook for an user.
+        //There should be only one PriceBook for an user
+        //Administrator user will have access to multiple PriceBook, consider only one PriceBook for admin.
+        Set<Id> pricbookAssignedForUser =  SharedPricebooks.getPricebooks();        
+        System.debug('pricbookAssignedForUser:'+pricbookAssignedForUser);
+        String priceBookId = '';
+        for(Id priceBook : pricbookAssignedForUser){
+            priceBookId = priceBook;
+            break;
+        }
+        List<PricebookEntry> priceBookEntryItems = [select Pricebook2Id,Product2Id,UnitPrice 
+                                                    from PricebookEntry where 
+                                                    Pricebook2Id  =:priceBookId];
+        System.debug('priceBookEntryItems:'+priceBookEntryItems);
+
+        //Add products and their price into map.
+        Map<Id,Decimal> productPriceMap = new Map<Id,Decimal>();
+        for(PricebookEntry pricebookEntry : priceBookEntryItems){
+            if(pricebookEntry.Product2Id <> null && pricebookEntry.UnitPrice <> null)
+                productPriceMap.put(pricebookEntry.Product2Id, pricebookEntry.UnitPrice);
+        }
         
         for(Sales_Order_Line_Items__c soli : soliList){
             List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
             shipWrapper shipWrap = new shipWrapper();
+            //Get price from map and multiply with quantity for total price.
+            soli.Price__c = productPriceMap.get(soli.Product__c) * soli.Quantity__c;
             shipWrap.soli = soli;
             
             if(soli.Product_Type__c == 'Bundle'){
@@ -62,6 +86,7 @@ public without sharing class SOControllerNew {
                     if(soli.Product__c == prdBund.Parent_Product__c){
                         Product_Bundle__c prodBundle = prdBund.clone(true, true, false, false);
                         prodBundle.Quantity__c = prdBund.Quantity__c * soli.Quantity__c;
+                        prodBundle.Price__c = prodBundle.Quantity__c * productPriceMap.get(prdBund.Child_Product__c);
                         prodBundSubList.add(prodBundle);
                     }
                 }

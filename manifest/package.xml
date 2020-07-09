@@ -9,6 +9,7 @@
         <members>CatalogOrderControllerNew</members>
         <members>SOControllerNew</members>
         <members>SOConfirmationPDFCtrl</members>
+        <members>SharedPricebooks</members>
         <name>ApexClass</name>
     </types>
     <types>

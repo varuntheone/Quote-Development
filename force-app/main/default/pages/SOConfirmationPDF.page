@@ -117,7 +117,6 @@
     </table>
     <br/>
 
-    <!--<apex:repeat value="{!shipWrapList}" var="shipWrap">-->
     <table border="1">
         <tr>
             <th>Model</th>
@@ -154,10 +153,11 @@
             </tr>
 
             <tr style="{!IF((shipWrap.soli.Product_Type__c == 'Bundle'),'','display:none')}">
-                <!--<table border="1">
-                    <tbody>-->
-                <th>Bundle Products</th>
+                <th>Bundle detail for {!shipWrap.soli.Product_Code__c}</th>
                 <th>Info</th>
+                <th></th>
+                <th></th>
+                <th></th>
                 <apex:repeat value="{!shipWrap.bundleProducts}" var="bundle">
                     
                     <tr>                   
@@ -173,14 +173,14 @@
                         <p class="slds-truncate"><b style="width:80px;display:inline-block;">Quantity
                             </b>: {!bundle.Quantity__c}</p>
                     </td>  
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>                          
                 </apex:repeat>
-            <!--</tbody>
-            </table>-->
         </tr>
         </apex:repeat>
     </table>
-    <!--</apex:repeat>-->
 
 
 

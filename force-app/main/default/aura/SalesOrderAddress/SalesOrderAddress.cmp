@@ -128,32 +128,12 @@
                             <c:SalesOrderAddressTable AddressList="{!v.ShipAddressList}" addressType="Ship"/>
                         </div>
                     </lightning:layoutItem>
-                </lightning:layout >
-                
-                
-                
-                
-                <!--<aura:if isTrue="{!v.suzhouFlag}">
-                    <lightning:layout >
-                        <lightning:layoutItem class="slds-p-right_x-small" size="6">
-                            <div class="slds-box">
-                                <h2 class="box-title" style="width:60px">Buyer</h2>
-                                <c:SalesOrderAddressTable AddressList="{!v.BuyerAddressList}" addressType="Buyer"/>
-                            </div>
-                        </lightning:layoutItem>
-                        <lightning:layoutItem class="slds-p-left_x-small" size="6">
-                            <div class="slds-box">
-                                <h2 class="box-title" style="width:85px">Invoice To</h2>
-                                <c:SalesOrderAddressTable AddressList="{!v.InvoiceAddressList}" addressType="Invoice"/>
-                            </div>
-                        </lightning:layoutItem>
-                    </lightning:layout >	
-                </aura:if>-->
-                
-                
+                </lightning:layout >               
             </div>
+            
             <div class="slds-modal__footer slds-p-around--x-small">
                 <lightning:button class="slds-button slds-button--brand" iconName="utility:file" onclick="{!c.openPDF}">PDF</lightning:button>
+                <lightning:button class="slds-button slds-button--brand" iconName="utility:file" onclick="{!c.createOpportunity}">Create Opportunity</lightning:button>
                 <lightning:button class="slds-button slds-button--brand" iconName="utility:package_org" onclick="{!c.ConfirmOrder}">Confirm Order</lightning:button>
                 <lightning:button class="slds-button slds-button--neutral" iconName="utility:close" onclick="{!c.closeModal}">Cancel</lightning:button>
                 
