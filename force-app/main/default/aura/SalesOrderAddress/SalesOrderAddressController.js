@@ -29,6 +29,24 @@
         component.set("v.salesOrderObj.Expected_Delivery_Date__c",formattedDate);
         
     },
+
+    opportunity: function (component, event, helper) {
+
+        var SO = component.get("v.salesOrderObj");
+        var custid = component.get("v.CustomerInfoID");
+        
+        var actionOpp = component.get("c.createOpportunityProducts");
+        actionOpp.setParams({
+            "custInfoid": custid,
+            "SO": SO
+        });
+        actionOpp.setCallback(this, function (response) {
+            var state = response.getState();
+            alert('state:' + state);                      
+        });
+        $A.enqueueAction(actionOpp);
+    },
+
     changeAddress : function(component, event,helper) 
     {
         //var recordByEvent = event.getParam("recordByEvent");
@@ -194,6 +212,33 @@
 
         var spinner = component.find('spinner');
         $A.util.toggleClass(spinner, "slds-hide");
+    },
+
+    createOpportunity : function(component,event,helper) {
+        
+        var SO = component.get("v.salesOrderObj");
+        if (!SO.Expected_Delivery_Date__c || SO.Expected_Delivery_Date__c == null) {
+            var message = "Expected delivery date is mandatory.";
+            helper.warningToast(component, event, helper, message);
+            return;
+        }
+        //new date validation to be later thAn today
+        var today = new Date();
+        today.setDate(today.getDate() + 1);
+        var presentDate = $A.localizationService.formatDate(today, "yyyy-MM-dd");
+        console.log("SO.Expected_Delivery_Date__c:" + SO.Expected_Delivery_Date__c);
+        console.log("presentDate:" + presentDate);
+        if (SO.Expected_Delivery_Date__c < presentDate) {
+            var message = "Expected Delivery date must be later than today.";
+            helper.warningToast(component, event, helper, message);
+            event.preventDefault();
+            return;
+        }
+        helper.confirmOpportunity(component, event, helper);
+
+        var spinner = component.find('spinner');
+        $A.util.toggleClass(spinner, "slds-hide");
+
     },
 
     successToast: function (component, event, helper,message) {

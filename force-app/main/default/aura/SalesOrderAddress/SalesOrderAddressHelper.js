@@ -345,10 +345,10 @@
         var custInfoid =component.get("v.CustomerInfoID");
         var ShipAddIndex = component.get("v.ShipAddressIndex");
         var ShipAdd = component.get("v.ShipAddressList")[ShipAddIndex];
-        var BuyerAddressIndex = component.get("v.BuyerAddressIndex");
-        var BuyerAdd = component.get("v.BuyerAddressList")[BuyerAddressIndex];
-        var InvoiceAddressIndex = component.get("v.InvoiceAddressIndex");
-        var InvoiceAdd = component.get("v.InvoiceAddressList")[InvoiceAddressIndex];
+        //var BuyerAddressIndex = component.get("v.BuyerAddressIndex");
+        //var BuyerAdd = component.get("v.BuyerAddressList")[BuyerAddressIndex];
+        //var InvoiceAddressIndex = component.get("v.InvoiceAddressIndex");
+        //var InvoiceAdd = component.get("v.InvoiceAddressList")[InvoiceAddressIndex];
         var SO = component.get("v.salesOrderObj");
         //alert(JSON.stringify(SO));
         var action = component.get("c.SaveOrder");
@@ -381,6 +381,71 @@
         });
         $A.enqueueAction(action);
     },
+
+    confirmOpportunity: function (component, event, helper) {
+
+        var SO = component.get("v.salesOrderObj");
+        var custid = component.get("v.CustomerInfoID");
+        
+        var actionOpp = component.get("c.createOpportunityProducts");
+        actionOpp.setParams({
+            "custInfoid": custid,
+            "SO": SO
+        });
+        actionOpp.setCallback(this, function (response) {
+            var state = response.getState();
+            //alert('state:' + state);
+            var res = response.getReturnValue();
+            if (state === "SUCCESS") {
+                if (res) {
+                    var toastEvent = $A.get("e.force:showToast");
+                    toastEvent.setParams({
+                        "title": "Success!",
+                        "type": "success",
+                        "message": "Opportunity created successfully."
+                    });
+                    toastEvent.fire();
+                    //$A.get('e.force:refreshView').fire();
+                }                                
+            }
+            var spinner = component.find('spinner');
+            $A.util.toggleClass(spinner, "slds-hide");
+        });
+        $A.enqueueAction(actionOpp);
+
+        /*var SO = component.get("v.salesOrderObj");
+        var custInfoid =component.get("v.CustomerInfoID");
+        //alert("custInfoid:" + custInfoid);
+        var action = component.get("c.createOpportunity");
+        action.setParams({
+            "custInfoid": custInfoid,
+            "SO": SO
+        });
+        action.setCallback(this, function(response){
+            var state = response.getState();
+            //alert("state:"+state)
+            var res = response.getReturnValue();
+            if (state === "SUCCESS") {
+                if (res) {
+                    var toastEvent = $A.get("e.force:showToast");
+                    toastEvent.setParams({
+                        "title": "Success!",
+                        "type": "success",
+                        "message": "Opportunity created successfully."
+                    });
+                    toastEvent.fire();
+                    $A.get('e.force:refreshView').fire();
+                }                                
+            }
+            else if (state === "ERROR") {
+                alert('Error : ' + JSON.stringify(response.getError()));
+            } 
+            //var spinner = component.find('spinner');
+            //$A.util.toggleClass(spinner, "slds-hide");
+        });
+        $A.enqueueAction(action);*/
+    },
+
     toGetDependentValues : function(component, controllingValue, controllingFields, dependentField) 
     {
         var actionCall = component.get("c.DependentPicklist");

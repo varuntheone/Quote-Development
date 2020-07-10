@@ -77,8 +77,11 @@ public with sharing class SOControllerNew {
         for(Sales_Order_Line_Items__c soli : soliList){
             List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
             shipWrapper shipWrap = new shipWrapper();
+
             //Get price from map and multiply with quantity for total price.
-            soli.Price__c = productPriceMap.get(soli.Product__c) * soli.Quantity__c;
+            if(productPriceMap.get(soli.Product__c) <> null && soli.Quantity__c <> null)
+                soli.Price__c = productPriceMap.get(soli.Product__c) * soli.Quantity__c;
+            
             shipWrap.soli = soli;
             
             if(soli.Product_Type__c == 'Bundle'){
@@ -86,7 +89,10 @@ public with sharing class SOControllerNew {
                     if(soli.Product__c == prdBund.Parent_Product__c){
                         Product_Bundle__c prodBundle = prdBund.clone(true, true, false, false);
                         prodBundle.Quantity__c = prdBund.Quantity__c * soli.Quantity__c;
-                        prodBundle.Price__c = prodBundle.Quantity__c * productPriceMap.get(prdBund.Child_Product__c);
+
+                        if(prodBundle.Quantity__c <> null && productPriceMap.get(prdBund.Child_Product__c) <> null)
+                            prodBundle.Price__c = prodBundle.Quantity__c * productPriceMap.get(prdBund.Child_Product__c);
+                        
                         prodBundSubList.add(prodBundle);
                     }
                 }
@@ -253,6 +259,39 @@ public with sharing class SOControllerNew {
             System.debug('Failed to Confirm Order:' + e);
         }
         return cartSO.Id;
+    }
+
+    @AuraEnabled
+    public static Boolean createOpportunityProducts(String custInfoid, Sales_Order__c SO){
+        System.debug('#### Inside createOpportunity ####');
+        System.debug('custInfoid:'+custInfoid);
+        System.debug('SO:'+SO);
+
+        Boolean createStatus = true;
+        //Get assigned PriceBook for an user.
+        //There should be only one PriceBook for an user
+        //Administrator user will have access to multiple PriceBook, consider only one PriceBook for admin.
+        Set<Id> pricbookAssignedForUser =  SharedPricebooks.getPricebooks();        
+        System.debug('pricbookAssignedForUser:'+pricbookAssignedForUser);
+        String priceBookId = '';
+        for(Id priceBook : pricbookAssignedForUser){
+            priceBookId = priceBook;
+            break;
+        }
+
+        Id accountId = [SELECT Id FROM Account where Name = 'Kasetti Technologies' limit 1].Id;
+        Integer oppCount = [select count() from Opportunity];
+        
+        Opportunity newOpportunity = new Opportunity();
+        newOpportunity.Name = 'Opp ' + String.valueOf( oppCount + 1);
+        newOpportunity.AccountId = accountId;
+        newOpportunity.CloseDate = SO.Expected_Delivery_Date__c;
+        newOpportunity.StageName = 'Closed Won';
+        newOpportunity.Type = 'New Business';
+        newOpportunity.Pricebook2Id = priceBookId;
+        insert newOpportunity;
+
+        return createStatus;
     }
 
     //Update SalesOrder for generating pdf.

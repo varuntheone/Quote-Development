@@ -26,12 +26,22 @@ public with sharing class CatalogOrderControllerNew {
     public static List<Product2> listProducts() {
         /*Product List will be filtered based on PriceBook because different PriceBook may be 
         assigned for a perticular uer/group/role.*/
-        Set<Id> pricbookAssignedForUser =  SharedPricebooks.getPricebooks();
+        
+        //Get assigned PriceBook for an user.
+        //There should be only one PriceBook for an user
+        //Administrator user will have access to multiple PriceBook, consider only one PriceBook for admin.
+        Set<Id> pricbookAssignedForUser =  SharedPricebooks.getPricebooks();        
         System.debug('pricbookAssignedForUser:'+pricbookAssignedForUser);
+        String priceBookId = '';
+        for(Id priceBook : pricbookAssignedForUser){
+            priceBookId = priceBook;
+            break;
+        }
+        System.debug('priceBookId:'+priceBookId);
 
         List<PricebookEntry> priceBookEntryItems = [select Pricebook2Id,Product2Id,ProductCode 
                                                     from PricebookEntry where 
-                                                    Pricebook2Id in :pricbookAssignedForUser];
+                                                    Pricebook2Id =:priceBookId];
         System.debug('priceBookEntryItems:'+priceBookEntryItems);
 
         Set<Id> uniquePrdId = new Set<Id>();
