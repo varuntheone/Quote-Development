@@ -121,12 +121,13 @@
         <tr>
             <th>Model</th>
             <th>Visual</th>
-            <th>Color</th>
+            <!--<th>Color</th>-->
             <th>Product Description </th>
 
             <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Barcode</th>
             <th style="display:{!IF( isLabelOrRFID, '' , 'None')}">Size</th>
             <th>Quantity</th>
+            <th>Price</th>
             <th style="display:{!IF( isprice, '' , 'None')}">Price/100pcs <br />(Ex-Work, without VAT)</th>
             <th style="display:{!IF( isprice, '' , 'None')}">Amount <br />({!SORec.Currency__c})</th>
         </tr>
@@ -141,14 +142,17 @@
                 <td>
                     <img src="{!shipWrap.soli.Product_image_url__c}" alt="Product" width="80" />
                 </td>
-                <td>
+                <!--<td>
                     <apex:outputText value="{!shipWrap.soli.Product_Code__c}" />
-                </td>
+                </td>-->
                 <td>
                     <apex:outputText value="{!shipWrap.soli.Product_Description__c}" />
                 </td>
                 <td>
                     <apex:outputText value="{!shipWrap.soli.Quantity__c}" />
+                </td>
+                <td>
+                    <apex:outputText value="{!shipWrap.soli.Price__c}" />
                 </td>
             </tr>
 
@@ -160,23 +164,23 @@
                 <th></th>
                 <apex:repeat value="{!shipWrap.bundleProducts}" var="bundle">
                     
-                    <tr>                   
-                    <td>
-                        <img src="{!bundle.Child_Product__r.Product_image_url__c}" alt="Product" width="80" />
-                    </td>
-                    <td>
-                        <p><b style="width:80px;display:inline-block;">Code
-                            </b><span style="color:#a41f34;">:
-                                {!bundle.Child_Product__r.ProductCode}</span></p>
-                        <p class="slds-truncate"><b style="width:80px;display:inline-block;">Description
-                            </b>: {!bundle.Child_Product__r.Description}</p>
-                        <p class="slds-truncate"><b style="width:80px;display:inline-block;">Quantity
-                            </b>: {!bundle.Quantity__c}</p>
-                    </td>  
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>                          
+                    <tr>
+                        <td>
+                            <img src="{!bundle.Child_Product__r.Product_image_url__c}" alt="Product" width="80" />
+                        </td>
+                        <td>
+                            <p><b style="width:80px;display:inline-block;">Code
+                                </b><span style="color:#a41f34;">:
+                                    {!bundle.Child_Product__r.ProductCode}</span></p>
+                            <p class="slds-truncate"><b style="width:80px;display:inline-block;">Description
+                                </b>: {!bundle.Child_Product__r.Description}</p>
+                            <p class="slds-truncate"><b style="width:80px;display:inline-block;">Quantity
+                                </b>: {!bundle.Quantity__c}</p>
+                        </td>
+                        <td><apex:outputText value="{!shipWrap.soli.Product_Description__c}" /></td>
+                        <td><apex:outputText value="{!bundle.Quantity__c}" /></td>
+                        <td><apex:outputText value="{!bundle.Price__c}" /></td>
+                    </tr>
                 </apex:repeat>
         </tr>
         </apex:repeat>

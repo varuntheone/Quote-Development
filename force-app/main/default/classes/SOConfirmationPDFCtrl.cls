@@ -130,9 +130,38 @@ public Class SOConfirmationPDFCtrl
         system.debug('prodBundleListSize:'+prodBundleList.Size());
         shipWrapList = new List<shipWrapper>();
 
+        /* For calculation of price -- starts */
+        //Get assigned PriceBook for an user.
+        //There should be only one PriceBook for an user
+        //Administrator user will have access to multiple PriceBook, consider only one PriceBook for admin.
+        Set<Id> pricbookAssignedForUser =  SharedPricebooks.getPricebooks();        
+        System.debug('pricbookAssignedForUser:'+pricbookAssignedForUser);
+        String priceBookId = '';
+        for(Id priceBook : pricbookAssignedForUser){
+            priceBookId = priceBook;
+            break;
+        }
+        List<PricebookEntry> priceBookEntryItems = [select Pricebook2Id,Product2Id,UnitPrice 
+                                                    from PricebookEntry where 
+                                                    Pricebook2Id  =:priceBookId];
+        System.debug('priceBookEntryItems:'+priceBookEntryItems);
+
+        //Add products and their price into map.
+        Map<Id,Decimal> productPriceMap = new Map<Id,Decimal>();
+        for(PricebookEntry pricebookEntry : priceBookEntryItems){
+            if(pricebookEntry.Product2Id <> null && pricebookEntry.UnitPrice <> null)
+                productPriceMap.put(pricebookEntry.Product2Id, pricebookEntry.UnitPrice);
+        }
+        /* For calculation of price -- ends */
+
         for(Sales_Order_Line_Items__c soli:SORec.Sales_Order_Line_Items__r) {            
             List<Product_Bundle__c> prodBundSubList = new List<Product_Bundle__c>();
             shipWrapper shipWrap = new shipWrapper();
+
+            //Get price from map and multiply with quantity for total price.
+            if(productPriceMap.get(soli.Product__c) <> null && soli.Quantity__c <> null)
+                soli.Price__c = productPriceMap.get(soli.Product__c) * soli.Quantity__c;
+            
             shipWrap.soli = soli;
             
             if(soli.Product_Type__c == 'Bundle'){
@@ -140,6 +169,10 @@ public Class SOConfirmationPDFCtrl
                     if(soli.Product__c == prdBund.Parent_Product__c){
                         Product_Bundle__c prodBundle = prdBund.clone(true, true, false, false);
                         prodBundle.Quantity__c = prdBund.Quantity__c * soli.Quantity__c;
+
+                        if(prodBundle.Quantity__c <> null && productPriceMap.get(prdBund.Child_Product__c) <> null)
+                            prodBundle.Price__c = prodBundle.Quantity__c * productPriceMap.get(prdBund.Child_Product__c);
+                        
                         prodBundSubList.add(prodBundle);
                     }
                 }

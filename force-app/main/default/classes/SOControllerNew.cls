@@ -278,12 +278,37 @@ public with sharing class SOControllerNew {
             priceBookId = priceBook;
             break;
         }
+        List<PricebookEntry> priceBookEntryItems = [select Pricebook2Id,Product2Id,UnitPrice 
+                                                    from PricebookEntry where 
+                                                    Pricebook2Id  =:priceBookId];
+        System.debug('priceBookEntryItems:'+priceBookEntryItems);
 
+        //Add products and their price into map.
+        Map<Id,Decimal> productPriceMap = new Map<Id,Decimal>();
+        for(PricebookEntry pricebookEntry : priceBookEntryItems){
+            if(pricebookEntry.Product2Id <> null && pricebookEntry.UnitPrice <> null)
+                productPriceMap.put(pricebookEntry.Product2Id, pricebookEntry.UnitPrice);
+        }
+
+        List<Sales_Order_Line_Items__c> soliList = [SELECT Product__c,Product_Type__c,Quantity__c FROM Sales_Order_Line_Items__c 
+                                                    WHERE Sales_Order__c =:SO.Id];
+    
+        Set<Id> parentProducts = new Set<Id>();
+        if (soliList <> null && soliList.size() > 0) {
+            for (Sales_Order_Line_Items__c soLineItm : soliList) {
+                parentProducts.add(soLineItm.Product__c);
+            }
+        }
+        
+        List<Product_Bundle__c> prodBundleList = [SELECT Parent_Product__c,Child_Product__c,Quantity__c                                                  
+                                                  FROM Product_Bundle__c WHERE Parent_Product__c <> null AND
+                                                  Child_Product__c <> null AND Parent_Product__c IN :parentProducts];
+        
         Id accountId = [SELECT Id FROM Account where Name = 'Kasetti Technologies' limit 1].Id;
         Integer oppCount = [select count() from Opportunity];
         
         Opportunity newOpportunity = new Opportunity();
-        newOpportunity.Name = 'Opp ' + String.valueOf( oppCount + 1);
+        newOpportunity.Name = 'Opp-' + String.valueOf( oppCount + 1);
         newOpportunity.AccountId = accountId;
         newOpportunity.CloseDate = SO.Expected_Delivery_Date__c;
         newOpportunity.StageName = 'Closed Won';
@@ -291,6 +316,124 @@ public with sharing class SOControllerNew {
         newOpportunity.Pricebook2Id = priceBookId;
         insert newOpportunity;
 
+        List<OpportunityLineItem> oppProductsList = new List<OpportunityLineItem>();
+        for(Sales_Order_Line_Items__c soli : soliList){
+            //OpportunityLineItem oppProducts = new OpportunityLineItem();            
+
+            if(soli.Product_Type__c == 'Bundle'){
+                for(Product_Bundle__c prdBund : prodBundleList){
+                    if(soli.Product__c == prdBund.Parent_Product__c){
+                        OpportunityLineItem oppProducts = new OpportunityLineItem();
+                        oppProducts.OpportunityId = newOpportunity.Id;
+                        oppProducts.Product2Id = prdBund.Child_Product__c;
+                        oppProducts.Product_Type__c = soli.Product_Type__c;
+                        oppProducts.Quantity = prdBund.Quantity__c * soli.Quantity__c;
+                        oppProducts.UnitPrice = (productPriceMap.get(prdBund.Child_Product__c) <> null)? productPriceMap.get(prdBund.Child_Product__c) : 0;
+                        oppProductsList.add(oppProducts);
+                    }
+                }
+            } else {
+                OpportunityLineItem oppProducts = new OpportunityLineItem();
+                oppProducts.OpportunityId = newOpportunity.Id;
+                oppProducts.Product2Id = soli.Product__c;
+                oppProducts.Product_Type__c = soli.Product_Type__c;
+                oppProducts.Quantity = soli.Quantity__c;
+                oppProducts.UnitPrice = (productPriceMap.get(soli.Product__c) <> null)? productPriceMap.get(soli.Product__c) : 0;
+                oppProductsList.add(oppProducts);
+            }
+        }
+        try {
+            if(oppProductsList.size() > 0)
+                insert oppProductsList;
+        } catch (DmlException e) {
+            createStatus = false;
+            System.debug('Failed to Update Order for pdf generation:' + e);
+        }
+        return createStatus;
+    }
+
+    @AuraEnabled
+    public static Boolean createQuoteLineItems(String custInfoid, Sales_Order__c SO){
+        Boolean createStatus = true;
+        //Get assigned PriceBook for an user.
+        //There should be only one PriceBook for an user
+        //Administrator user will have access to multiple PriceBook, consider only one PriceBook for admin.
+        Set<Id> pricbookAssignedForUser =  SharedPricebooks.getPricebooks();        
+        System.debug('pricbookAssignedForUser:'+pricbookAssignedForUser);
+        String priceBookId = '';
+        for(Id priceBook : pricbookAssignedForUser){
+            priceBookId = priceBook;
+            break;
+        }
+        List<PricebookEntry> priceBookEntryItems = [select Pricebook2Id,Product2Id,UnitPrice 
+                                                    from PricebookEntry where 
+                                                    Pricebook2Id  =:priceBookId];
+        System.debug('priceBookEntryItems:'+priceBookEntryItems);
+
+        //Add products and their price into map.
+        Map<Id,Decimal> productPriceMap = new Map<Id,Decimal>();
+        for(PricebookEntry pricebookEntry : priceBookEntryItems){
+            if(pricebookEntry.Product2Id <> null && pricebookEntry.UnitPrice <> null)
+                productPriceMap.put(pricebookEntry.Product2Id, pricebookEntry.UnitPrice);
+        }
+
+        List<Sales_Order_Line_Items__c> soliList = [SELECT Product__c,Product_Type__c,Quantity__c FROM Sales_Order_Line_Items__c 
+                                                    WHERE Sales_Order__c =:SO.Id];
+    
+        Set<Id> parentProducts = new Set<Id>();
+        if (soliList <> null && soliList.size() > 0) {
+            for (Sales_Order_Line_Items__c soLineItm : soliList) {
+                parentProducts.add(soLineItm.Product__c);
+            }
+        }
+        
+        List<Product_Bundle__c> prodBundleList = [SELECT Parent_Product__c,Child_Product__c,Quantity__c                                                  
+                                                  FROM Product_Bundle__c WHERE Parent_Product__c <> null AND
+                                                  Child_Product__c <> null AND Parent_Product__c IN :parentProducts];
+        
+        Id accountId = [SELECT Id FROM Account where Name = 'Kasetti Technologies' limit 1].Id;
+        Integer oppCount = [select count() from Opportunity];
+        
+        Quote__c newQuote = new Quote__c();
+        newQuote.Account__c = accountId;
+        newQuote.Status__c = 'Approved';
+        newQuote.Type__c = 'Quote';
+        newQuote.Price_Book__c = priceBookId;
+        insert newQuote;
+
+        List<Quote_Line__c> quoteLineItemList = new List<Quote_Line__c>();
+        for(Sales_Order_Line_Items__c soli : soliList){
+            //OpportunityLineItem oppProducts = new OpportunityLineItem();            
+
+            if(soli.Product_Type__c == 'Bundle'){
+                for(Product_Bundle__c prdBund : prodBundleList){
+                    if(soli.Product__c == prdBund.Parent_Product__c){
+                        Quote_Line__c quoteLine = new Quote_Line__c();
+                        quoteLine.Quote__c = newQuote.Id;
+                        quoteLine.Product__c = prdBund.Child_Product__c;
+                        quoteLine.Product_Type__c = soli.Product_Type__c;
+                        quoteLine.Quantity__c = prdBund.Quantity__c * soli.Quantity__c;
+                        quoteLine.Net_Unit_Price__c = (productPriceMap.get(prdBund.Child_Product__c) <> null)? productPriceMap.get(prdBund.Child_Product__c) : 0;
+                        quoteLineItemList.add(quoteLine);
+                    }
+                }
+            } else {
+                Quote_Line__c quoteLine = new Quote_Line__c();
+                quoteLine.Quote__c = newQuote.Id;
+                quoteLine.Product__c = soli.Product__c;
+                quoteLine.Product_Type__c = soli.Product_Type__c;
+                quoteLine.Quantity__c = soli.Quantity__c;
+                quoteLine.Net_Unit_Price__c = (productPriceMap.get(soli.Product__c) <> null)? productPriceMap.get(soli.Product__c) : 0;
+                quoteLineItemList.add(quoteLine);
+            }
+        }
+        try {
+            if(quoteLineItemList.size() > 0)
+                insert quoteLineItemList;
+        } catch (DmlException e) {
+            createStatus = false;
+            System.debug('Failed to Update Order for pdf generation:' + e);
+        }
         return createStatus;
     }
 

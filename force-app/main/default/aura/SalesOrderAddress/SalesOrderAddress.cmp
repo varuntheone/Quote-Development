@@ -61,7 +61,7 @@
                         <!--<aura:if isTrue="{!v.OrderSource == 'PO'}">-->
                             
                             <div class="slds-col slds-size_1-of-3 slds-truncate slds-m-bottom--x-small1">
-                                <lightning:select name="select1"  value="{!v.salesOrderObj.Company__c}" title="{!v.salesOrderObj.Company__c}"  label="Order To Company" onchange="{!c.OrderToCompany}" required="true">
+                                <lightning:select name="select1"  value="{!v.salesOrderObj.Company__c}" title="{!v.salesOrderObj.Company__c}"  label="Company" onchange="{!c.OrderToCompany}" required="true">
                                     <option value="NULL" text="NONE"></option>                                    
                                     <aura:iteration items="{!v.companyList}" var="fld" >
                                         <option value="{!fld}" text="{!fld}" selected="{!fld==v.salesOrderObj.Company__c}"></option>
@@ -69,7 +69,7 @@
                                 </lightning:select>
                             </div>
                             <div class="slds-col slds-size_1-of-3 slds-truncate slds-m-bottom--x-small1">
-                                <lightning:select name="select1"  value="{!v.salesOrderObj.Currency__c}" title="{!v.salesOrderObj.Currency__c}" label="Preferred Currency" required="true">
+                                <lightning:select name="select1"  value="{!v.salesOrderObj.Currency__c}" title="{!v.salesOrderObj.Currency__c}" label="Currency" required="true">
                                     <option value="NULL" text="NONE"></option>                                    
                                     <aura:iteration items="{!v.currencyList}" var="fld" >
                                         <option value="{!fld}" text="{!fld}" selected="{!fld==v.salesOrderObj.Currency__c}"></option>
@@ -80,17 +80,17 @@
                         
                         <div class="slds-col slds-size_1-of-3 slds-m-bottom--x-small1">
                             <div class="slds-truncate ">
-                                <lightning:input type="date" aura:id="ExpectedDeliveryDate" name="ExpectedDeliveryDate" label=" Expected Ex-Factory Date" messageWhenValueMissing="Complete this field." value="{!v.salesOrderObj.Expected_Delivery_Date__c}" title="{!v.salesOrderObj.Expected_Delivery_Date__c}" onchange="{!c.changeDate}" required="true"/>
+                                <lightning:input type="date" aura:id="ExpectedDeliveryDate" name="ExpectedDeliveryDate" label=" Date" messageWhenValueMissing="Complete this field." value="{!v.salesOrderObj.Expected_Delivery_Date__c}" title="{!v.salesOrderObj.Expected_Delivery_Date__c}" onchange="{!c.changeDate}" required="true"/>
                             </div>
                         </div>
                         
                         
                         <div class="slds-col slds-size_1-of-3 slds-truncate slds-m-bottom--x-small1">
-                            <lightning:input type="text" name="Factory Internal PO Number" label="Factory Internal PO #" default="" value="{!v.salesOrderObj.Factory_Internal_PO__c}" title="{!v.salesOrderObj.Factory_Internal_PO__c}" />
+                            <lightning:input type="text" name="Factory Internal PO Number" label="Purchase Order" default="" value="{!v.salesOrderObj.Factory_Internal_PO__c}" title="{!v.salesOrderObj.Factory_Internal_PO__c}" />
                         </div>
                         
                         <div class="slds-col slds-size_1-of-3 slds-truncate slds-m-bottom--x-small1">
-                            <lightning:select name="select1"  value="{!v.salesOrderObj.Delivery_Instruction__c}" title="{!v.salesOrderObj.Delivery_Instruction__c}" label="Delivery Instruction" required="true">
+                            <lightning:select name="select1"  value="{!v.salesOrderObj.Delivery_Instruction__c}" title="{!v.salesOrderObj.Delivery_Instruction__c}" label="Delivery" required="true">
                                 <option value="NULL" text="NONE"></option>                                
                                <aura:iteration items="{!v.shipTermList}" var="fld" >
                                     <option value="{!fld}" text="{!fld}" selected="{!fld==v.salesOrderObj.Delivery_Instruction__c}"></option>
@@ -107,10 +107,10 @@
                     <h2 class="box-title" style="width:200px;">Customer comment and Remarks</h2>
                     <div class="slds-grid slds-wrap" style="margin-top:-20px;">
                         <div class="slds-size_1-of-3 slds-m-right_x-small">                           
-                            <lightning:textarea rows="1" name="Forwarder/Transportation Details" label="Forwarder/Transportation Details" value="{!v.salesOrderObj.Transportation_Details__c}" title="{!v.salesOrderObj.Transportation_Details__c}"/>
+                            <lightning:textarea rows="1" name="Transportation Details" label="Forwarder/Transportation Details" value="{!v.salesOrderObj.Transportation_Details__c}" title="{!v.salesOrderObj.Transportation_Details__c}"/>
                         </div>
                         <div class="slds-size_1-of-3 slds-m-left_x-small">
-                            <lightning:textarea rows="1" name="Shipping Mark" label="Shipping Mark/Special Instruction" value="{!v.salesOrderObj.Shipping_Mark__c}" title="{!v.salesOrderObj.Shipping_Mark__c}"/>
+                            <lightning:textarea rows="1" name="Shipping Mark" label="Special Instruction" value="{!v.salesOrderObj.Shipping_Mark__c}" title="{!v.salesOrderObj.Shipping_Mark__c}"/>
                         </div>
                     </div>
                 </div>
@@ -133,6 +133,7 @@
             
             <div class="slds-modal__footer slds-p-around--x-small">
                 <lightning:button class="slds-button slds-button--brand" iconName="utility:file" onclick="{!c.openPDF}">PDF</lightning:button>
+                <lightning:button class="slds-button slds-button--brand" iconName="utility:file" onclick="{!c.createQuote}">Create Quote</lightning:button>
                 <lightning:button class="slds-button slds-button--brand" iconName="utility:file" onclick="{!c.createOpportunity}">Create Opportunity</lightning:button>
                 <lightning:button class="slds-button slds-button--brand" iconName="utility:package_org" onclick="{!c.ConfirmOrder}">Confirm Order</lightning:button>
                 <lightning:button class="slds-button slds-button--neutral" iconName="utility:close" onclick="{!c.closeModal}">Cancel</lightning:button>

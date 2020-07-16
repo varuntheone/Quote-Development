@@ -218,7 +218,7 @@
         
         var SO = component.get("v.salesOrderObj");
         if (!SO.Expected_Delivery_Date__c || SO.Expected_Delivery_Date__c == null) {
-            var message = "Expected delivery date is mandatory.";
+            var message = "Date is mandatory.";
             helper.warningToast(component, event, helper, message);
             return;
         }
@@ -229,12 +229,39 @@
         console.log("SO.Expected_Delivery_Date__c:" + SO.Expected_Delivery_Date__c);
         console.log("presentDate:" + presentDate);
         if (SO.Expected_Delivery_Date__c < presentDate) {
-            var message = "Expected Delivery date must be later than today.";
+            var message = "Date must be later than today.";
             helper.warningToast(component, event, helper, message);
             event.preventDefault();
             return;
         }
         helper.confirmOpportunity(component, event, helper);
+
+        var spinner = component.find('spinner');
+        $A.util.toggleClass(spinner, "slds-hide");
+
+    },
+
+    createQuote : function(component,event,helper) {
+        
+        var SO = component.get("v.salesOrderObj");
+        if (!SO.Expected_Delivery_Date__c || SO.Expected_Delivery_Date__c == null) {
+            var message = "Date is mandatory.";
+            helper.warningToast(component, event, helper, message);
+            return;
+        }
+        //new date validation to be later thAn today
+        var today = new Date();
+        today.setDate(today.getDate() + 1);
+        var presentDate = $A.localizationService.formatDate(today, "yyyy-MM-dd");
+        console.log("SO.Expected_Delivery_Date__c:" + SO.Expected_Delivery_Date__c);
+        console.log("presentDate:" + presentDate);
+        if (SO.Expected_Delivery_Date__c < presentDate) {
+            var message = "Date must be later than today.";
+            helper.warningToast(component, event, helper, message);
+            event.preventDefault();
+            return;
+        }
+        helper.conformQuote(component, event, helper);
 
         var spinner = component.find('spinner');
         $A.util.toggleClass(spinner, "slds-hide");

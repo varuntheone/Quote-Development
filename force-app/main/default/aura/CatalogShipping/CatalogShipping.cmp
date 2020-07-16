@@ -94,12 +94,16 @@
                                             <p><b style="width:140px;display:inline-block;">Product Code </b><span
                                                     style="color:#a41f34;">: {!cartDetail.soli.Product_Code__c}</span>
                                             </p>
-                                            <p><b style="width:140px;display:inline-block;">Price </b><span
-                                                style="color:#a41f34;">: {!cartDetail.soli.Price__c}</span>
+                                            <p class="slds-truncate"><b style="width:140px;display:inline-block;">Description
+                                                </b>: {!cartDetail.soli.Product_Description__c}
                                             </p>
-                                            <p class="slds-truncate"><b
-                                                    style="width:140px;display:inline-block;">Description
-                                                </b>: {!cartDetail.soli.Product_Description__c}</p>
+                                            <aura:If isTrue="{!cartDetail.soli.Product_Type__c != 'Bundle'}">
+                                                <p><b style="width:140px;display:inline-block;">Price </b><span
+                                                    style="color:#a41f34;">: {!cartDetail.soli.Price__c}</span>
+                                                </p>
+                                            </aura:If>
+                                            
+                                            
                                         </td>
                                         <td data-label="Close Date">
                                             <lightning:input type="number" aura:id="myInput" name="{!ind}"

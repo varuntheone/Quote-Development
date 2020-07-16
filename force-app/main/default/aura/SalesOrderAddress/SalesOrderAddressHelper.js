@@ -412,18 +412,21 @@
             $A.util.toggleClass(spinner, "slds-hide");
         });
         $A.enqueueAction(actionOpp);
+    },
 
-        /*var SO = component.get("v.salesOrderObj");
-        var custInfoid =component.get("v.CustomerInfoID");
-        //alert("custInfoid:" + custInfoid);
-        var action = component.get("c.createOpportunity");
-        action.setParams({
-            "custInfoid": custInfoid,
+    conformQuote: function (component, event, helper) {
+
+        var SO = component.get("v.salesOrderObj");
+        var custid = component.get("v.CustomerInfoID");
+        
+        var actionOpp = component.get("c.createQuoteLineItems");
+        actionOpp.setParams({
+            "custInfoid": custid,
             "SO": SO
         });
-        action.setCallback(this, function(response){
+        actionOpp.setCallback(this, function (response) {
             var state = response.getState();
-            //alert("state:"+state)
+            //alert('state:' + state);
             var res = response.getReturnValue();
             if (state === "SUCCESS") {
                 if (res) {
@@ -431,19 +434,16 @@
                     toastEvent.setParams({
                         "title": "Success!",
                         "type": "success",
-                        "message": "Opportunity created successfully."
+                        "message": "Quote created successfully."
                     });
                     toastEvent.fire();
-                    $A.get('e.force:refreshView').fire();
+                    //$A.get('e.force:refreshView').fire();
                 }                                
             }
-            else if (state === "ERROR") {
-                alert('Error : ' + JSON.stringify(response.getError()));
-            } 
-            //var spinner = component.find('spinner');
-            //$A.util.toggleClass(spinner, "slds-hide");
+            var spinner = component.find('spinner');
+            $A.util.toggleClass(spinner, "slds-hide");
         });
-        $A.enqueueAction(action);*/
+        $A.enqueueAction(actionOpp);
     },
 
     toGetDependentValues : function(component, controllingValue, controllingFields, dependentField) 
